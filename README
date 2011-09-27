@@ -2,3 +2,9 @@ BLOOM (for Basic Lua Object Oriented Model) is a simple OOP layer for Lua langua
 
 Although already usable, this is a work in progress. 
 A LOT of things needs to be done or refined.
+
+* Running examples
+
+Examples must be launch from the examples/ directory.
+
+$ lua [-i] <filename.lua> [args]

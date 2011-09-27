@@ -1,5 +1,14 @@
 module("bloom", package.seeall)
 
+local logger = nil
+
+local log =
+    function(...)
+        if logger then
+            logger(unpack(arg))
+        end
+    end
+    
 Object = {}
 Class = {}
 
@@ -295,7 +304,7 @@ ClassLoader = MetaClass:makeClass("ClassLoader", {bloom.Object},
 				local filename = className:replace("%.", "/")
                 local filenameInNativeFormat = filename:get() .. ".lua"
                 for _, v in pairs(self.path) do
-                    print("loading file : " .. v .. filenameInNativeFormat)
+                    log("loading file : " .. v .. filenameInNativeFormat)
                     local chunk, err = loadfile(v .. filenameInNativeFormat)
                     if chunk ~= nil then
                         local desc = chunk()
@@ -304,7 +313,7 @@ ClassLoader = MetaClass:makeClass("ClassLoader", {bloom.Object},
                     end
                 end
                 
-                print("File \"" .. filenameInNativeFormat .. "\" : not found")
+                log("File \"" .. filenameInNativeFormat .. "\" : not found")
                 return nil, "failed to load file"
 			end
 	})
@@ -348,7 +357,7 @@ defaultClassLoader = ClassLoader:instanciate()
 
 local bindString =
 	function(what, pathStr)
-		print("binding string " .. pathStr:get())
+		log("binding string " .. pathStr:get())
 		local splitName = pathStr:split("%.")
 		local classNameIdx = #splitName
 		
@@ -359,7 +368,7 @@ local bindString =
 			if rootNs == nil then
 				local newNs = {}
 				currNs[rootNsName] = newNs
-				print("binding " .. rootNsName)
+				log("binding " .. rootNsName)
 				currNs = newNs
 			else
 				currNs = rootNs
@@ -367,7 +376,7 @@ local bindString =
 		end
 
 		currNs[splitName[classNameIdx]:get()] = what
-		print("binding " .. splitName[classNameIdx]:get())
+		log("binding " .. splitName[classNameIdx]:get())
 	end
 
 loadClass =
@@ -378,12 +387,12 @@ loadClass =
 			-- REFAIRE cette boucle de manière simple, et pas en copier/coller tout pourri
 			local currNs = _G
 			for _, name in pairs(splitName) do
-				print("looking for " .. name:get())
+				log("looking for " .. name:get())
 				local rootNsName = name:get()
 				local rootNs = currNs[rootNsName]
 				currNs = rootNs -- we must "export" the value of rootNS outside the loop !
 				if rootNs == nil then
-					print("looking for " .. name:get() .. " not found !")
+					log("looking for " .. name:get() .. " not found !")
 					break; -- <== 
 				end
 			end
@@ -419,6 +428,10 @@ MetaClass.__methods__.getClass =
         return MetaClass.__class__
     end
 
+setLogger =
+    function(fn)
+        logger = fn
+    end
 
 -- Les logs doivent être optionnels
 -- Ajouter une fonction pour positionner des paramètres de la toolkit : bloom.setOption(name, value) / bloom.setOptions(table)
