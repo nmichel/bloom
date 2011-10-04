@@ -5,6 +5,6 @@ A LOT of things needs to be done or refined.
 
 * Running examples
 
-Examples must be launch from the examples/ directory.
+Examples must be launched from examples/ directory.
 
 $ lua [-i] <filename.lua> [args]
