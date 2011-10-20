@@ -443,6 +443,11 @@ bind =
         bindString(what, classString)
     end
 
+addLookupPath = 
+    function (path)
+        return defaultClassLoader:addLookupPath(path)
+    end
+    
 MetaClass.__class__ = MetaClass
 MetaClass.__bases__ = {Object}
 
@@ -456,7 +461,6 @@ setLogger =
         logger = fn
     end
 
--- Les logs doivent être optionnels
 -- Ajouter une fonction pour positionner des paramètres de la toolkit : bloom.setOption(name, value) / bloom.setOptions(table)
 -- Limiter la création des attributs à la méthode __init()__
 -- Ajouter Class:getMetaclass() : A = B:getMetaclass():makeClass("A", {B}, ...)
