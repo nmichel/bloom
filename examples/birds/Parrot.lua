@@ -1,11 +1,11 @@
 return {
-	"Parrot",
-	{bloom.Object},
-	{
-		__init__ =
-			function(self, name)
+    "Parrot",
+    {bloom.Object},
+    {
+        __init__ =
+            function(self, name)
                 self.name = name or "Rio"
-			end,
+            end,
 
         says =
             function(self, what, out)
