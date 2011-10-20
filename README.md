@@ -2,7 +2,7 @@
 
 BLOOM (for Basic Lua Object Oriented Model) is a simple OOP for Lua language.
 
-<img src="https://github.com/nmichel/bloom/downloads/bloom-banner.png" alt="BLOOM logo" align="right" width="180" />
+<img src="https://github.com/downloads/nmichel/bloom/bloom-banner.png" alt="BLOOM logo" align="right" width="180" />
 
 ## Warning
 
