@@ -111,3 +111,10 @@ local salute = helloWorld:salute()
 print(salute)
 </code></pre>
 
+## To Be Continued ...
+* Class definition
+* Inheritance 
+* Methods overriding and invoking base class method (with self:super()()) 
+* Inspection
+* MetaClass and MetaClass specialization
+* More examples
