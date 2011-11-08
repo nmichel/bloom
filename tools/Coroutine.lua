@@ -1,11 +1,11 @@
 return {
-	"Coroutine",
-	{bloom.Object},
-	{
-		__init__ =
-			function(self)
+    "Coroutine",
+    {bloom.Object},
+    {
+        __init__ =
+            function(self)
                 self.co = coroutine.create(function (...) self:run() end)
-			end,
+            end,
 
         resume = 
             function(self, ...)
@@ -17,8 +17,8 @@ return {
                 return coroutine.yield(unpack(arg))
             end,
             
-		run =
-			function(self, ...)
-			end
-	}
+        run =
+            function(self, ...)
+            end
+    }
 }
