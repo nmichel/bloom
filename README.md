@@ -18,7 +18,7 @@ results = object:method(parameters)</tt>
 </code></pre>
 By providing a decent inheritance mechanism, _bloom_ also speeds up routing specialization by reducing it to inheritances and method overloading.
 
-_bloom_ is lot of FUN, in writing it, in playing with it ... in applying it to real world telecommunication software.
+_bloom_ is a lot of FUN, in writing it, in playing with it ... in applying it to real world telecommunication software.
 I hope you will enjoy it.
 
 ## Running examples
@@ -103,7 +103,7 @@ Create a file <tt>HelloWorld.lua</tt> returning the definition of the _HelloWorl
 
 Then use the classloading mecanism to load the _HelloWorld_ class.
 
-<pre></code>require(bloom)
+<pre><code>require(bloom)
 bloom.loadClass("HelloWorld")
 
 local helloWorld = HelloWorld:instanciate("Donald")
@@ -111,10 +111,161 @@ local salute = helloWorld:salute()
 print(salute)
 </code></pre>
 
+## Inheritance
+
+A class can inherit another (or several). The former is called "derived class", while the latter 
+is said to be the "base class". A derived class can redefine (or override) some methods of base classes. When a method is called on an object, the version of the method called depends on real type of the object. A overridden method can call a base class's version, with _self:super()()_.
+
+### Simple example
+
+Lets have a base class called ... Base, defined in inherit/simple/Base.lua
+<pre><code>return {
+    "Base",
+    {bloom.Object},
+    {
+        __init__ =
+            function(self, name)
+                self.name = name or "John Doe"
+            end,
+
+        myType = 
+            function (self)
+                return "Base"
+            end,
+            
+        says =
+            function(self, what, out)
+                return (out or print)(self.name .. " of class " .. self:myType() .. " says " .. tostring(what or "nothing"))
+            end
+    }
+}
+</code></pre>
+
+The method _says()_ uses method _myType()_ (amongst other details) to build a string passed to a
+function (if  provided) or printed out. Note that _myType()_ doesn't use base class _Object_ to
+ retrieve class name (as in _self:getClass():getName()_). This is because code is evaluated at runtime, so _self:getClass()_ will return the real class, not _Base_ as one might expect at first sight.
+
+We define a class called _Derived_ inheriting _Base_, in file inherit/simple/Derived.lua
+
+<pre><code>return {
+    "Derived",
+    {inherit.simple.Base},
+    {
+        __init__ =
+            function(self, ...)
+            end,
+
+        myType = 
+            function (self)
+                return "Derived (derived from " .. self:super()().. ")" -- Note call to base class version of myType() using self:super()()
+            end
+    }
+}
+</code></pre>
+
+Class _Derived_ overrides method _myType()_, and uses _self:super()()_ to call _Base_'s version.
+
+Now we can write a script which uses both classes, and calls _says()_ on a instance of each of both.
+
+<pre><code>bloom.loadClass("inherit.simple.Base")
+bloom.loadClass("inherit.simple.Derived")
+
+local b = inherit.simple.Base:instanciate("b")
+local d = inherit.simple.Derived:instanciate("d")
+
+local function says(who, what)
+    who:says(what)
+end
+
+says(b, "Hello world!")
+says(d, "Hello world!")
+</code></pre>
+
+### Advanced example
+
+Lets modify class _Derived_, to simply overrides _myType()_ and add method _foo()_.
+<pre><code>        // ...
+        myType = 
+            function (self)
+                return "Derived"
+            end,
+
+        foo = 
+            function (self)
+                return "foo"
+            end
+</code></pre>
+
+We define class _OtherDerived_ also inheriting _Base_. _OtherDerived_ is nearly identical to _Derived_.
+
+<pre><code>        // ...
+        myType = 
+            function (self)
+                return "OtherDerived"
+            end,
+
+        bar = 
+            function (self)
+                return "bar"
+            end
+</code></pre>
+
+Note that both _Derived_ and _OtherDerived_ redefine _myType()_.
+
+Now we define class _MultiDerived_ inheriting _Derived_ and _OtherDerived_.
+<pre><code>return {
+    "MultiDerived",
+    {inherit.advanced.Derived, inherit.advanced.OtherDerived}, -- Multiple inheritance
+    {
+        __init__ =
+            function(self, ...)
+            end,
+
+        myType = 
+            function (self)
+                local res = ""
+                for _, v in pairs(self:getClass():getSuperClasses()) do
+                    res = res .. " " .. self:super(v)() -- Calling myType() of each base class
+                end
+                return "MultiDerived (" .. res .. " )"
+            end
+    }
+}
+</code></pre>
+
+Simple isn't it ? The interesting point is how _myType()_ is redefined in _MultiDerived_. It illustrates the way you can select a base class version of an overridden method, with _self:super(<BaseClass>)(...)_.
+
+Here follows a client script, which uses all these classes.
+
+<pre><code>bloom.loadClass("inherit.advanced.Base")
+bloom.loadClass("inherit.advanced.Derived")
+bloom.loadClass("inherit.advanced.OtherDerived")
+bloom.loadClass("inherit.advanced.MultiDerived")
+
+local d = inherit.advanced.Derived:instanciate("d")
+local od = inherit.advanced.OtherDerived:instanciate("od")
+local md = inherit.advanced.MultiDerived:instanciate("md")
+
+print("d:foo()", pcall(d.foo, d))
+print("od:foo()", pcall(od.foo, od)) -- Fail
+
+print("d:bar()", pcall(d.bar, d)) -- Fail
+print("od:bar()", pcall(od.bar, od))
+
+print("md:bar()", pcall(md.foo, md))
+print("md:foo()", pcall(md.bar, md))
+
+local function says(who, what)
+    who:says(what)
+end
+
+says(d, "Hello world!")
+says(od, "Hello world!")
+says(md, "Hello world!")
+</code></pre>
+
 ## To Be Continued ...
 * Class definition
-* Inheritance 
-* Methods overriding and invoking base class method (with self:super()()) 
 * Inspection
 * MetaClass and MetaClass specialization
 * More examples
