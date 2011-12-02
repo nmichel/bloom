@@ -270,6 +270,7 @@ Class = MetaClass:makeClass("Class", {Object},
             function(self, ...)
                 local object = {
                     __class__ = self,
+                    super = 42 -- force creation of field "super" to avoid misses (see makeBinder())
                 }
                 
                 setmetatable(
@@ -288,6 +289,14 @@ Class = MetaClass:makeClass("Class", {Object},
 
                 object:__init__(unpack(arg))
 
+                -- Creation of new fields outside initialization phase is forbidden
+                -- 
+                local metatable = getmetatable(object)
+                metatable.__newindex = 
+                    function(t, k, v)
+                        error("Not allowed to created new field [" .. k .. "]")
+                    end
+                
                 return object
             end
     })
