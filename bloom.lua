@@ -5,16 +5,14 @@ local logger = nil
 local log =
     function(...)
         if logger then
-            logger(unpack(arg))
+            logger(...)
         end
     end
-    
-Object = {}
-Class = {}
+
+Class = nil
 
 MetaClass = {
     __name__ = "MetaClass",
-    __bases__ = {},
     __methods__ = {}
 }
 MetaClass.__meta__ = MetaClass
@@ -28,7 +26,7 @@ MetaClass.__methods__.makeClass =
         local c = {}
         c.__name__ = name
         c.__meta__ = metaClass
-        c.__class__ = c
+        c.__class__ = Class -- A class object is always an instance of class Class :)
         c.__bases__ = bases
         c.__methods__ = {}
 
@@ -55,10 +53,10 @@ MetaClass.__methods__.makeClass =
                     local ctor =
                         function (self, ...)
                             for _, v in pairs(c.__bases__) do
-                                v.__methods__.__init__(self, unpack(arg))
+                                v.__methods__.__init__(self, ...)
                             end
                             local i = func
-                            func(self, unpack(arg))
+                            func(self, ...)
                         end
                         
                     metaClass:makeMethod(c, name, ctor)                        
@@ -143,7 +141,7 @@ MetaClass.__methods__.makeBinder =
             function (self, ...)
                 local oldSuper = self.super
                 self.super = sup
-                local pack = {func(self, unpack(arg, 1, arg.n))}
+                local pack = {func(self, ...)}
                 self.super = oldSuper
                 return unpack(pack)
             end
@@ -166,33 +164,19 @@ MetaClass.__methods__.makeMethod =
                     return
                         function(...)
                             local m = clazz.__meta__:findMethodInBases(clazz, name)
-                            return m(instance, unpack(arg))
+                            return m(instance, ...)
                         end
                 else
                     return
                         function(...)
                             local m = clazz.__meta__:findMethodInBase(clazz, name, baseClass)
-                            return m(instance, unpack(arg))
+                            return m(instance, ...)
                         end
                 end
             end
 
         -- [FIXME - Propagate "clazz" and "name" to makeBinder]
         clazz.__methods__[name] = metaClass:makeBinder(func, __super)
-    end
-
-MetaClass.__methods__.getName =
-    function(self)
-        return self.__name__
-    end
-
-MetaClass.__methods__.getMethods =
-    function(self)
-        local m = {}
-        for methodName, method in pairs(self.__methods__) do
-            m[self:getName() .. "." .. methodName] = method
-        end
-        return m
     end
 
 --[[
@@ -260,12 +244,7 @@ Class = MetaClass:makeClass("Class", {Object},
             function(self)
                 return self.__bases__
             end,
-            
-        getClass =
-            function(self)
-                return Class
-            end,
-            
+
         instanciate = 
             function(self, ...)
                 local object = {
@@ -287,7 +266,7 @@ Class = MetaClass:makeClass("Class", {Object},
                             end
                     })
 
-                object:__init__(unpack(arg))
+                object:__init__(...)
 
                 -- Creation of new fields outside initialization phase is forbidden
                 -- 
@@ -300,6 +279,12 @@ Class = MetaClass:makeClass("Class", {Object},
                 return object
             end
     })
+
+-- When class definitions pointed by Object and Class are built, Class is set to nil.
+-- We have to finialize by hand the setup of these classes.
+-- 
+Object.__class__ = Class
+Class.__class__ = Class
 
 ClassLoader = MetaClass:makeClass("ClassLoader", {bloom.Object},
     {
@@ -460,18 +445,12 @@ addLookupPath =
 MetaClass.__class__ = MetaClass
 MetaClass.__bases__ = {Object}
 
-MetaClass.__methods__.getClass =
-    function (self)
-        return MetaClass.__class__
-    end
-
 setLogger =
     function(fn)
         logger = fn
     end
 
 -- Ajouter une fonction pour positionner des paramètres de la toolkit : bloom.setOption(name, value) / bloom.setOptions(table)
--- Limiter la création des attributs à la méthode __init()__
 -- Ajouter Class:getMetaclass() : A = B:getMetaclass():makeClass("A", {B}, ...)
 -- Ajouter les attributs de classe : __static__ = function (selfClass) selfClass.staticInt = 2 ... end
 -- Ajouter le contrôle de l'invocation dans la MetaClass : MetaClass.invoke, au lieu de l'appel direct à la méthode
