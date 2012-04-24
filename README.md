@@ -60,6 +60,8 @@ In such cases (as to use shared class libraries, ...) you have to add lookup pat
 
 ## Class definition
 
+One can define a class either by calling method _makeClass_ on a instance of a metaclass, or by using class loading.
+
 ### Explicit declaration
 
 <pre><code>local HelloWorld = bloom.MetaClass:makeClass("HelloWorld", {bloom.Object},
@@ -101,7 +103,7 @@ Create a file <tt>HelloWorld.lua</tt> returning the definition of the _HelloWorl
 }
 </code></pre>
 
-Then use the classloading mecanism to load the _HelloWorld_ class.
+Then use the class loading mecanism to load the _HelloWorld_ class.
 
 <pre><code>require(bloom)
 bloom.loadClass("HelloWorld")
@@ -114,7 +116,11 @@ print(salute)
 ## Inheritance
 
 A class can inherit another (or several). The former is called "derived class", while the latter 
-is said to be the "base class". A derived class can redefine (or override) some methods of base classes. When a method is called on an object, the version of the method called depends on real type of the object. A overridden method can call a base class's version, with _self:super()()_.
+is said to be the "base class". A derived class can redefine (or override) some methods of base classes. When 
+a method is called on an object, the version of the method called depends on real type of the object.
+
+A overridden method can call a base class's version, with _self:super()()_. By providing a class when calling _super_, 
+one can indicate which base class version of the method must be called, e.g. _self:super(inherit.advanced.OtherDerived)()_.
 
 ### Simple example
 
@@ -264,8 +270,19 @@ says(od, "Hello world!")
 says(md, "Hello world!")
 </code></pre>
 
+## Metaclass
+
+Basically, a metaclass is what you use to build classes. But the metaclass which has build a class also defines 
+the behaviour of this class in every occasion, e.g. how the class finds a method in its set of base classes or (soon) how
+a method is invoked on a instance.
+
+You can define a new metaclass class by inheriting from existing one(s). Then you just have to instanciate it to be able 
+to create new classes using your brand new metaclass.
+
+Currently _bloom.MetaClass_ is somewhat special as it is not a instanciation of a MetaClass class, and you can not
+instanciate it. It is a singularity in the model that may change in the future.
+
 ## To Be Continued ...
-* Class definition
+* 
 * Inspection
-* MetaClass and MetaClass specialization
 * More examples
