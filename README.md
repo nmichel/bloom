@@ -1,6 +1,6 @@
 # BLOOM <a href="http://coderwall.com/nmichel"><img alt="Endorse nmichel on Coderwall" src="http://api.coderwall.com/nmichel/endorsecount.png" align="right" /></a>
 
-BLOOM (as in Basic Lua Object Oriented Model) is a simple OOP for Lua language.
+BLOOM (as in Basic Lua Object Oriented Model) is a simple OOP layer for Lua language.
 
 <img src="https://github.com/downloads/nmichel/bloom/bloom-banner.png" alt="BLOOM logo" align="right" width="180" />
 
